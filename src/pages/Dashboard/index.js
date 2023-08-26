@@ -45,7 +45,36 @@ export default function Dashboard() {
               <tr>
                 <td data-label="Cliente">Mercado esquina</td>
                 <td data-label="Assunto">Suporte</td>
-                <td data-label="Status">Em Aberto</td>
+                <td data-label="Status">
+                  <span className="badge" style={{ backgroundColor: '#999' }}>
+                    Em Aberto
+                  </span>
+                </td>
+                <td data-label="Cadastrado">12/05/2022</td>
+                <td data-label="#">
+                  <button
+                    className="action"
+                    style={{ backgroundColor: '#3583f6' }}
+                  >
+                    <FiSearch color="#FFF" size={17} />
+                  </button>
+                  <button
+                    className="action"
+                    style={{ backgroundColor: '#F6A935' }}
+                  >
+                    <FiEdit2 color="#FFF" size={17} />
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td data-label="Cliente">Mercado esquina</td>
+                <td data-label="Assunto">Suporte</td>
+                <td data-label="Status">
+                  <span className="badge" style={{ backgroundColor: '#999' }}>
+                    Em Aberto
+                  </span>
+                </td>
                 <td data-label="Cadastrado">12/05/2022</td>
                 <td data-label="#">
                   <button
