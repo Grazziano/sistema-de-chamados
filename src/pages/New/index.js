@@ -1,18 +1,76 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlusCircle } from 'react-icons/fi';
+
+import { AuthContext } from '../../contexts/auth';
+import { db } from '../../services/firebaseConnection';
+import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+
 import './new.css';
 
+const listRef = collection(db, 'customers');
+
 export default function New() {
+  const { user } = useContext(AuthContext);
+
   const [customers, setCustomers] = useState([]);
+  const [loadCustomer, setLoadCustomer] = useState(true);
+  const [customerSelected, setCustomerSelected] = useState(0);
+
   const [complemento, setComplemento] = useState('');
   const [assunto, setAssunto] = useState('Suporte');
   const [status, setStatus] = useState('Aberto');
 
+  useEffect(() => {
+    async function loadCustomers() {
+      const querySnapshot = await getDocs(listRef)
+        .then((snapshot) => {
+          // console.log(snapshot.docs);
+          let lista = [];
+
+          snapshot.forEach((doc) => {
+            lista.push({
+              id: doc.id,
+              fantasyName: doc.data().fantasyName,
+            });
+          });
+
+          // console.log(lista);
+
+          if (snapshot.docs.size === 0) {
+            console.log('NENHUMA EMPRESA ENCONTRADA');
+            setCustomers([{ id: '1', fantasyName: 'Freela' }]);
+            setLoadCustomer(false);
+            return;
+          }
+
+          setCustomers(lista);
+          setLoadCustomer(false);
+        })
+        .catch((error) => {
+          console.log('ERRO AO BUSCAR OS CLIENTES', error);
+          setLoadCustomer(false);
+          setCustomers([{ id: '1', fantasyName: 'Freela' }]);
+        });
+    }
+
+    loadCustomers();
+  }, []);
+
   function handleOptionChange(e) {
     setStatus(e.target.value);
     console.log(e.target.value);
+  }
+
+  function handleChangeSelect(e) {
+    setAssunto(e.target.value);
+    console.log(e.target.value);
+  }
+
+  function handleChangeCustomer(e) {
+    setCustomerSelected(e.target.value);
+    console.log(customers[e.target.value].fantasyName);
   }
 
   return (
@@ -27,17 +85,22 @@ export default function New() {
         <div className="container">
           <form className="form-profile">
             <label>Clientes</label>
-            <select>
-              <option key={1} value={1}>
-                Mercado Teste
-              </option>
-              <option key={2} value={2}>
-                Loja Informatica
-              </option>
-            </select>
+            {loadCustomer ? (
+              <input type="text" disabled={true} value="carregando..." />
+            ) : (
+              <select value={customerSelected} onChange={handleChangeCustomer}>
+                {customers.map((item, index) => {
+                  return (
+                    <option key={index} value={index}>
+                      {item.fantasyName}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
 
             <label>Assunto</label>
-            <select>
+            <select value={assunto} onChange={handleChangeSelect}>
               <option value="Suporte">Suporte</option>
               <option value="Visita Tecnica">Visita Tecnica</option>
               <option value="Financeiro">Financeiro</option>
