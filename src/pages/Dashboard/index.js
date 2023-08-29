@@ -27,7 +27,10 @@ export default function Dashboard() {
 
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [isEmpty, setIsEmpty] = useState(false);
+  const [lastDocs, setLastDocs] = useState();
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     async function loadChamados() {
@@ -64,10 +67,29 @@ export default function Dashboard() {
         });
       });
 
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]; // Pegando o último item
+
       setChamados((chamados) => [...chamados, ...lista]);
+
+      setLastDocs(lastDoc);
     } else {
       setIsEmpty(true);
     }
+
+    setLoadingMore(false);
+  }
+
+  async function handleMore() {
+    setLoadingMore(true);
+
+    const q = query(
+      listRef,
+      orderBy('created', 'desc'),
+      startAfter(lastDocs),
+      limit(5)
+    );
+    const querySnapshot = await getDocs(q);
+    await updateState(querySnapshot);
   }
 
   if (loading) {
@@ -133,7 +155,10 @@ export default function Dashboard() {
                         <td data-label="Status">
                           <span
                             className="badge"
-                            style={{ backgroundColor: '#999' }}
+                            style={{
+                              backgroundColor:
+                                item.status === 'Aberto' ? '#5CB85C' : '#999',
+                            }}
                           >
                             {item.status}
                           </span>
@@ -158,6 +183,13 @@ export default function Dashboard() {
                   })}
                 </tbody>
               </table>
+
+              {loadingMore && <h3>Buscando mais chamados...</h3>}
+              {!loadingMore && !isEmpty && (
+                <button className="btn-more" onClick={handleMore}>
+                  Buscar mais
+                </button>
+              )}
             </>
           )}
         </>
